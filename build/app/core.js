@@ -15,7 +15,7 @@ window.GEM = (function(d,w){
         requires :{},
         path : {
             repo : {
-                base : 'https://github.com/yeswejam/pr0gramm-spoiler-tags',
+                base : 'https://raw.githubusercontent.com/yeswejam/pr0gramm-spoiler-tags',
                 version : 'master',
                 app : 'build/app/'
             }
