@@ -1,5 +1,5 @@
 
-window.$ = $ || jQuery;
+
 
 window.GEM = (function(d,w){
     /**
@@ -34,11 +34,12 @@ window.GEM = (function(d,w){
     var getAppPath = function(){
 
         var _path = [],
-            _repo = _data.path.repo ;
+            _repo = _data.path.repo,
+            $ = $ || jQuery;
 
         if(!_repo.hasOwnProperty('fullpath')){
-            $(_repo).each(function(){
-                _path.push(this);
+            $(_repo).each(function(k,v){
+                _path.push(v);
             });
             _repo.fullpath = _path.join('/');
         }
