@@ -1,4 +1,6 @@
 
+window.$ = $ || jQuery;
+
 window.GEM = (function(d,w){
     /**
      *
@@ -35,7 +37,7 @@ window.GEM = (function(d,w){
             _repo = _data.path.repo ;
 
         if(!_repo.hasOwnProperty('fullpath')){
-            _repo.foreach(function(){
+            $(_repo).each(function(){
                 _path.push(this);
             });
             _repo.fullpath = _path.join('/');
