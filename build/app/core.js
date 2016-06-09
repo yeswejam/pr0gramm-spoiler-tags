@@ -88,15 +88,18 @@ window.GEM = (function(d,w){
 
         var sc =  d.createElement('script');
 
-        sc.onload =  function (e) {
-             _data.requires[this.src] = true;
-        };
+
         d.getElementsByTagName('body')[0].appendChild(sc);
 
         sc.setAttribute('type','text/javascript');
         sc.setAttribute('src',getScript(script));
 
         _data.requires[sc.src] = false;
+
+        sc.onload =  function (e) {
+            _data.requires[this.src] = true;
+        };
+
 
     };
 
@@ -112,7 +115,8 @@ window.GEM = (function(d,w){
             var ready = true;
 
             _data.requires.foreach(function(){
-                if(this === false) ready = false;
+                console.log(this);
+                if(this == false) ready = false;
             });
 
             if(ready){
@@ -160,20 +164,6 @@ window.GEM = (function(d,w){
                 }
             }
             return this;
-        }
-    });
-
-    Object.defineProperty(Object.prototype,'removeFromArray',{
-        value: function(mixed){
-            if(mixed.constructor === Array && mixed.indexOf(this) !== -1){
-                Array.prototype.splice.apply(mixed,[mixed.indexOf(this),1]);
-            }
-        }
-    });
-
-    Object.defineProperty(Object.prototype,'equals',{
-        value: function(mixed){
-            return this == mixed;
         }
     });
 
