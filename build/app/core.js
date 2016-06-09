@@ -38,7 +38,7 @@ window.GEM = (function(d,w){
             $ = $ || jQuery;
 
         if(!_repo.hasOwnProperty('fullpath')){
-            $(_repo).each(function(k,v){
+            $.each(_repo,function(k,v){
                 _path.push(v);
             });
             _repo.fullpath = _path.join('/');
