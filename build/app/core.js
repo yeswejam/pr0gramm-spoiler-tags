@@ -1,16 +1,22 @@
 
 window.GEM = (function(d,w){
-
+    /**
+     *
+     * @type {{dev: boolean, service: Array, requires: {}, path: {repo: {base: string, version: string, app: string}}, alias: {jQuery: string}}}
+     * @private
+     */
     var _data = {
 
-        dev : true,
+        dev : false,
 
         service : [],
-        requires :{
-        },
-
+        requires :{},
         path : {
-            build : 'https://github.com/yeswejam/pr0gramm-spoiler-tags/build/app/'
+            repo : {
+                base : 'https://github.com/yeswejam/pr0gramm-spoiler-tags',
+                version : 'master',
+                app : 'build/app/'
+            }
         },
         alias : {
 
@@ -19,6 +25,62 @@ window.GEM = (function(d,w){
     };
 
 
+    /**
+     *
+     * @returns {string}
+     */
+    var getAppPath = function(){
+
+        var _path = [],
+            _repo = _data.path.repo ;
+
+        if(!_repo.hasOwnProperty('fullpath')){
+            _repo.foreach(function(){
+                _path.push(this);
+            });
+            _repo.fullpath = _path.join('/');
+        }
+        return  _repo.fullpath;
+    };
+
+    /**
+     *
+     * @param script
+     * @returns {string}
+     */
+    var getFilePath = function(script){
+
+        return getAppPath()+script+'.js';
+    };
+
+    /**
+     *
+     * @param script
+     * @returns {*}
+     */
+    var getScript = function(script){
+
+        switch (script){
+            case 'jQuery' : return  _data.alias[script];
+            default :
+                if(_data.dev){
+                    var path =  w.location.pathname.split('/');
+
+                    path.splice(path.length-1,path.length);
+                    path.push('app');
+                    path.push(script+'.js');
+                    path.join('/');
+                    return path.join('/');
+                }
+                return getFilePath(script);
+        }
+    };
+
+
+    /**
+     *
+     * @param script
+     */
     this.require = function(script){
 
         var sc =  d.createElement('script');
@@ -35,6 +97,11 @@ window.GEM = (function(d,w){
 
     };
 
+
+    /**
+     *
+     * @param cb
+     */
     this.ready = function(cb){
 
         var inte = setInterval(function(){
@@ -48,38 +115,34 @@ window.GEM = (function(d,w){
             if(ready){
                 clearInterval(inte);
                 cb.call(GEM);
+
             }
         },20);
 
     };
+
+
+    /**
+     *
+     * @param name
+     * @returns {*}
+     */
     this.get = function(name){
 
         return _data.service[name];
     };
 
+    /**
+     *
+     * @param name
+     * @param service
+     */
     this.set = function(name,service){
 
          _data.service[name] = service;
     };
 
 
-    var getScript = function(script){
-
-        switch (script){
-            case 'jQuery' : return  _data.alias[script];
-            default :
-                if(_data.dev){
-                   var path =  w.location.pathname.split('/');
-
-                    path.splice(path.length-1,path.length);
-                    path.push('app');
-                    path.push(script+'.js');
-                    path.join('/');
-                    return path.join('/');
-                }
-                return _data.path.build[script]+'.js' ;
-        }
-    };
     return this;
 
 }).call({},document,window);

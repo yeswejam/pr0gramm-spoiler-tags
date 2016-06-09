@@ -16,7 +16,4 @@ GEM.ready(function(){
 
 
 });
-/*
-var storage = GEM.get('storage');
-storage.setNameSpace('pr0gramm-spoiler-tags');
-storage.set('test','yo');*/
+
