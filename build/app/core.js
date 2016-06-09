@@ -115,7 +115,7 @@ window.GEM = (function(d,w){
             var ready = true;
 
             _data.requires.foreach(function(){
-                console.log(this);
+
                 if(this == false) ready = false;
             });
 
