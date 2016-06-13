@@ -16,6 +16,7 @@ window.GEM = (function(d,w){
         requires :{},
         defines  :{},
         inheritance : {},
+        classReady : {},
         loading : false,
         callbacks : {
             ready : []
@@ -97,6 +98,11 @@ window.GEM = (function(d,w){
     };
 
 
+    this.classExists = function(c){
+
+        return this.classes[c] !== undefined && typeof this.classes[c] == 'function';
+    }
+
     /**
      *
      * @param script
@@ -107,9 +113,15 @@ window.GEM = (function(d,w){
         var data = _data.included.indexOf(script)
         if(_data.included.indexOf(script) != -1) return;
         if(script == 'GEM.BaseWrapper') return;
-
+/*
         var sc =  d.createElement('script');
-        sc.async = true;
+
+
+
+        sc.onload =  function (e) {
+
+
+        };
 
         d.getElementsByTagName('body')[0].appendChild(sc);
 
@@ -118,17 +130,30 @@ window.GEM = (function(d,w){
         sc.setAttribute('type','text/javascript');
         sc.setAttribute('src',src);
 
-        _data.requires[sc.src] = false;
+
+*/
+        var src = getScript(script);
+        _data.requires[src] = false;
         _data.loading = true;
         _data.included.push(script);
 
-        sc.onload =  function (e) {
-            _data.requires[this.src] = true
+        $.getScript(src)
+            .done(function( script, textStatus ) {
 
-            if(typeof cb == "function" ){
-                cb.call(_this);
-            }
-        };
+                eval(script);
+                _data.requires[src] = true;
+
+
+                if(typeof cb == "function" ){
+                    cb.call(_this);
+                }
+            })
+            .fail(function( jqxhr, settings, exception ) {
+                console.log( 'error' ); // 200
+                console.log( exception); // 200
+
+            });
+
 
     };
 
@@ -139,73 +164,224 @@ window.GEM = (function(d,w){
 
     this.define = function(name,args){
 
-        if(!_data.defines.hasOwnProperty(name)){
-
-            _data.defines[name] = args;
-
-            this.classes[name] = args._class;
 
 
 
-            if(args.hasOwnProperty('_extend') && this.classes[args._extend] !== Function){
+            if(!_data.defines.hasOwnProperty(name)){
 
-                var recursiveInherit = function(_class,_parent){
+                _data.defines[name] = args;
 
-                    _this.require(_parent,null,function(){
+                this.classes[name] = args._class;
 
-                        var defines = _data.defines[_parent];
 
-                        if(defines !== undefined && defines._extend !== undefined){
 
-                            recursiveInherit(defines._class,defines._extend)
-                        }
+                if(args.hasOwnProperty('_extend') && this.classes[args._extend] !== Function){
 
-                        _data.inheritance[name] = _parent;
-                    });
+                    var recursiveInherit = function(_class,_parent){
+
+                        _this.require(_parent,null,function(){
+
+                            var defines = _data.defines[_parent];
+
+                            if(defines !== undefined && defines._extend !== undefined){
+
+                                recursiveInherit(defines._class,defines._extend)
+                            }
+                            _data.inheritance[name] = _parent;
+
+
+                        });
+                    }
+
+
+                    recursiveInherit(args._class,args._extend);
+
+
+
                 }
 
-                recursiveInherit(args._class,args._extend);
-
             }
-
-        }
-
 
     }
 
 
 
-    this.inheritNow = function(){
+    this.inheritNow = function(cb){
 
-        var data = [];
+        var data = [],
+            exists = {},
+            chain = {};
+
+        var _chain = {} ;
+
 
         _data.defines.foreach(function(k,v){
-            if(v._extend)
+            exists[k] = false;
+            if(v._extend !='GEM.Base' && k.indexOf('GEM.') !== -1){
+                exists[v._extend] =  v._extend !='GEM.Base';
+            }
+
+
+            if(v._extend){
                 data.push({_class : k, _parent : v._extend});
+
+                if(!chain.hasOwnProperty(k)){
+                    _chain[k] = [];
+                }
+                _chain[k].push(v._extend);
+            }
+
+        });
+        var _c = {};
+
+        _data.defines.foreach(function(k,v){
+
         });
 
-        data.reverse();
 
-        console.log(data);
-        data.foreach(function(){
-            console.log(this._class + ' extends ' + this._parent);
-            var _class = _this.classes[this._class],
-                _parent = _this.classes[this._parent];
+        var _list = {} ;
+        var _list1 ={};
+        var _list2 =[];
+        var times = 0;
+        function computeChain(){
 
-            _class.prototype = new _parent;
+            var pass= true;
+
+            data.foreach(function(){
+
+                var _this = this;
+
+
+                data.foreach(function(k1,v1){
+
+
+
+                    _list1[this._class] =  this._parent;
+
+                    if(this._class == _this._class) return;
+
+                    _list = _chain[_this._class];
+
+                    if(_list.indexOf(this._parent) == -1 && _list.indexOf(this._class) != -1){
+
+
+
+
+                        _list.push(this._parent);
+
+
+
+                        computeChain();
+
+                    }
+                });
+                var l = {};
+                l[this._class] = this._parent;
+                if(times == 0){
+                    _list2.push(l);
+                }
+            });
+
+
+            times++;
+        }
+        computeChain();
+
+
+
+ var l = [];
+
+        var arrayUnique = function(a) {
+            return a.reduce(function(p, c) {
+                if (p.indexOf(c) < 0) p.push(c);
+                return p;
+            }, []);
+        };
+        var x = arrayUnique(_list2);
+
+        /*
+        var _list2= $.map(_list1, function(value, index) {
+
+            var obj = {};
+            obj[index] = value;
+            l.push(obj);
+            return [value];
+        });
+*/
+
+
+        l.foreach(function(name,parent){
+
+
+            console.log(name + ' -> ' + parent);
+        });
+
+
+        function inherit(_class,_parent){
+
             _class.prototype.constructor = _class;
             _class.prototype._parent = _parent;
 
             _class.prototype.__className  = this._class;
             _class.prototype.__parentName = this._parent;
-        });
+        }
 
-        data.reverse();
+        var int = setInterval(function(){
+            var pass = true;
+            _data.defines.foreach(function(k,v){
+                if((k !='GEM.Base' || v._extend !='GEM.Base')  && k.indexOf('GEM.') !== -1){
+                    exists[k] = false;
+                    exists[v._extend] = false;
+                }
+                exists[k] = GEM.classExists(k);
+                exists[v._extend] = GEM.classExists(v._extend);
 
-        data.foreach(function(){
-          
-            _this.classes[this._class].prototype.constructor = _this.classes[this._class]
-        });
+                if(exists[k] == false || exists[v] == false){
+                    pass = false;
+                }
+            });
+            if(pass){
+               clearInterval(int);
+
+                data.reverse();
+
+                console.log(data);
+                data.foreach(function(){
+                    console.log(this._class + ' extends ' + this._parent);
+                    var _class = _this.classes[this._class],
+                        _parent = _this.classes[this._parent];
+
+                    try{
+                        _class.prototype = new _parent;
+                    }catch (e){
+                        console.log('exception');
+                        console.log(e);
+                    }
+
+                    _class.prototype.constructor = _class;
+                    _class.prototype._parent = _parent;
+
+                    _class.prototype.__className  = this._class;
+                    _class.prototype.__parentName = this._parent;
+                });
+
+                data.reverse();
+
+                data.foreach(function(){
+
+                    _this.classes[this._class].prototype.constructor = _this.classes[this._class]
+                    _data.classReady[this._class] = true;
+                });
+
+                cb();
+
+
+            }
+        },20);
+
+
+
+
     }
 
     /**
@@ -217,6 +393,11 @@ window.GEM = (function(d,w){
         _data.callbacks.ready.push(cb);
 
         var ret = null;
+
+        $(window).load(function(){
+
+
+
         var inte = setInterval(function(){
 
             var ready = true;
@@ -225,44 +406,65 @@ window.GEM = (function(d,w){
                 if(this == false) ready = false;
             });
 
+
             if(ready){
+                if(_this.loading){
+                    return this.ready(cb);
+                }
                 clearInterval(inte);
                 //  ret = cb.call(GEM);
 
                 var cbs =_data.callbacks.ready;
 
+                GEM.inheritNow(function(){
+
+                    cbs.foreach(function(){
+
+                        var cb
 
 
-                cbs.foreach(function(){
-                    this.call(GEM);
+                        this.call(GEM);
 
-                    var index = cbs.indexOf(this);
+                        var index = cbs.indexOf(this);
 
-                    Array.prototype.splice.apply(cbs,[index,index+1]);
+                        Array.prototype.splice.apply(cbs,[index,index+1]);
+                    });
+
                 });
+
 
 
             }
         },20);
-
+        });
         return ret;
     };
 
 
+    function create(){
+        var name = arguments[0];
+
+        if(_data.classReady[arguments[0]]){
+            var _class = this.getClass(name);
+
+            return _class.apply(new _class,[].slice.call(arguments,1,arguments.length));
+        }
+
+
+        return GEM.create.apply(GEM,arguments);
+
+    };
 
     this.create = function(){
 
         var name = arguments[0];
+        var o = {};
 
-        if(!this.isDefined(name)){
-            this.require(name);
-        }
 
-        var _class = this.getClass(arguments[0]);
+        this.require(name);
 
-        var o =_class.apply(new _class,[].slice.call(arguments,1,arguments.length))
 
-        return o;
+        return create.apply(this,arguments);
     };
 
     this.getClass = function(classname){
@@ -324,6 +526,9 @@ window.GEM = (function(d,w){
             return this;
         }
     });
+
+
+
 
     return this;
 

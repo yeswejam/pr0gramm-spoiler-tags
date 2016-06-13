@@ -8,7 +8,7 @@ GEM.define('GEM.layout.panel.Panel',{
 
             this.test = '2';
 
-            return this.super(arguments);;
+            return this.super(arguments);
         }
     }
-)
+);
