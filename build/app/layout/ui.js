@@ -1,7 +1,9 @@
+    GEM.define('GEM.layout.UI',{
 
-if(window.GEM !== undefined) {
 
-    GEM.set('ui', (function(){
+        _extend : 'GEM.layout.Button',
+        _class :  function UI(){
+
 
         var _this = this;
 
@@ -172,27 +174,8 @@ if(window.GEM !== undefined) {
         }
 
 
-        UiCmp.prototype.super = function(){
 
-
-            this.constructor.apply(this,args.call(arguments));
-        }
-
-        Container.prototype = UiCmp.prototype;
-        //Container.prototype.constructor = Container;
-
-        PanelHead.prototype = Container.prototype;
-        //PanelHead.prototype.constructor = PanelHead;
-
-        PanelBody.prototype = Container.prototype;
-        //PanelBody.prototype.constructor = PanelBody;
-
-        //Panel.prototype.constructor = Panel;
-
-
-
-
-
-        return this;
-    }).call({}));
-}
+        return this.super(arguments);;
+    }
+    }
+)

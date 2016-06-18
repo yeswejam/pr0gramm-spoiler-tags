@@ -11,12 +11,14 @@ if(window.GEM !== undefined) {
                 this.namespace = namespace;
                 return this;
             };
-            this.set = function(n,v){
+            this.setItem = function(n,v){
                 localStorage.setItem(this.namespace+'|'+n,v);
             };
-            this.get = function(n){
+            this.getItem = function(n){
                 localStorage.getItem(this.namespace+'|'+n);
             };
+
+
             return this;
         }
     });

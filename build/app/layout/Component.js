@@ -4,6 +4,7 @@ GEM.define('GEM.layout.Component',{
 
     _extend : 'GEM.Base',
 
+
     _class :  function Component(){
 
 
@@ -38,9 +39,6 @@ GEM.define('GEM.layout.Component',{
             });
             return _cmp[c];
         };
-
-
-        this.super(arguments);
 
 
         return this.super(arguments);;

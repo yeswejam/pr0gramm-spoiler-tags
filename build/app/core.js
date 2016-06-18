@@ -10,17 +10,7 @@ window.GEM = (function(d,w){
     var _data = {
 
         dev : true,
-        counter : 0,
-        service : [],
-        included :[],
-        requires :{},
-        defines  :{},
-        inheritance : {},
-        classReady : {},
-        loading : false,
-        callbacks : {
-            ready : []
-        },
+        writable: false,
         path : {
             repo : {
                 base : 'http://rawgit.com/yeswejam/pr0gramm-spoiler-tags',
@@ -29,34 +19,42 @@ window.GEM = (function(d,w){
             }
         },
         alias : {
-
             jQuery : 'https://ajax.googleapis.com/ajax/libs/jquery/2.2.4/jquery.min.js'
+        },
+        core : {
+            require :  [
+                'jQuery',
+                'GEM.Base',
+                'GEM.manager.ComponentManager',
+                'GEM.view.ViewController'
+            ]
+        },
+        counter : 0,
+        classes : [],
+        service : [],
+        included :[],
+        required :{},
+        requires :{},
+        defines  :{},
+        inheritance : {},
+        classReady : {},
+        loading : false,
+        coreRequired : false,
+        callbacks : {
+            list  : [],
+            then  : [],
+            ready : []
         }
-    },_this = this;
+    };
 
-    this.classes = {};
-
+    var _this = this;
 
     this.getData = function(){
-        return _data;
-    }
-
-    /**
-     *
-     * @returns {string}
-     */
-    var getAppPath = function(){
-
-        var _path = [],
-            _repo = _data.path.repo;
-
-        if(!_repo.hasOwnProperty('fullpath')){
-            _repo.foreach(function(){
-                _path.push(this);
-            });
-            _repo.fullpath = _path.join('/');
+        var c = {};
+        for(var i in _data){
+            c[i] = _data[i];
         }
-        return  _repo.fullpath;
+        return c;
     };
 
     /**
@@ -74,18 +72,21 @@ window.GEM = (function(d,w){
      * @param script
      * @returns {*}
      */
-    var getScript = function(script){
+    this.getScript = function(script){
 
         switch (script){
             case 'jQuery' : return  _data.alias[script];
             default :
                 if(_data.dev){
 
-                    var path =  w.location.pathname.split('/'),
+                    var path =  window.location.pathname.split('/'),
                         scriptpath = script.split('.');
-                    scriptpath.splice(0,1);
-                    scriptpath[scriptpath.length-1] = scriptpath[scriptpath.length-1]+'.js';
 
+                    if(scriptpath.length>1){
+                        scriptpath.splice(0,1);
+                    }
+
+                    scriptpath[scriptpath.length-1] = scriptpath[scriptpath.length-1]+'.js';
                     path.splice(path.length-1,path.length);
                     path.push('app');
                     path =  path.concat(scriptpath);
@@ -98,291 +99,53 @@ window.GEM = (function(d,w){
     };
 
 
-    this.classExists = function(c){
 
-        return this.classes[c] !== undefined && typeof this.classes[c] == 'function';
-    }
+    this.getCallback = function(id){
 
-    /**
-     *
-     * @param script
-     */
-    this.require = function(script,version,cb){
+        var callback = _data.callbacks.list[id];
 
-        if(script == 'jQuery' &&  !_data.dev) return;
-        var data = _data.included.indexOf(script)
-        if(_data.included.indexOf(script) != -1) return;
-        if(script == 'GEM.BaseWrapper') return;
-/*
-        var sc =  d.createElement('script');
-
-
-
-        sc.onload =  function (e) {
-
-
-        };
-
-        d.getElementsByTagName('body')[0].appendChild(sc);
-
-        var src = getScript(script);
-
-        sc.setAttribute('type','text/javascript');
-        sc.setAttribute('src',src);
-
-
-*/
-        var src = getScript(script);
-        _data.requires[src] = false;
-        _data.loading = true;
-        _data.included.push(script);
-
-        $.getScript(src)
-            .done(function( script, textStatus ) {
-
-                eval(script);
-                _data.requires[src] = true;
-
-
-                if(typeof cb == "function" ){
-                    cb.call(_this);
-                }
-            })
-            .fail(function( jqxhr, settings, exception ) {
-                console.log( 'error' ); // 200
-                console.log( exception); // 200
-
-            });
-
-
+        if(callback !== undefined && callback.constructor === Function ){
+            return _data.callbacks.list[id]
+        }
+        return function(){};
     };
 
-    this.isDefined = function(name){
 
-        return  _data.included.indexOf(name) != -1;
+    this.addCallback = function() {
+
+        var cid = this.count();
+
+        if (arguments[0] !== undefined){
+
+            return cid;
+        }
+
+        if (arguments[0] === String) {
+
+            if (!_data.callbacks.hasOwnProperty(arguments[0])) {
+
+                _data.callbacks[arguments[0]] = [];
+            }
+            return _data.callbacks[arguments[0]][cid] = arguments[1];
+        }
+
+        if (arguments[0].constructor === Function) {
+
+            return _data.callbacks[cid] = arguments[0];
+        }
+    }
+
+
+    this.require = function(){
+
+        return this.get('ClassManager').require.apply(this.get('ClassManager'),arguments);
     };
 
-    this.define = function(name,args){
+    this.define = function(){
 
+        return this.get('ClassManager').define.apply(this.get('ClassManager'),arguments);
+    };
 
-
-
-            if(!_data.defines.hasOwnProperty(name)){
-
-                _data.defines[name] = args;
-
-                this.classes[name] = args._class;
-
-
-
-                if(args.hasOwnProperty('_extend') && this.classes[args._extend] !== Function){
-
-                    var recursiveInherit = function(_class,_parent){
-
-                        _this.require(_parent,null,function(){
-
-                            var defines = _data.defines[_parent];
-
-                            if(defines !== undefined && defines._extend !== undefined){
-
-                                recursiveInherit(defines._class,defines._extend)
-                            }
-                            _data.inheritance[name] = _parent;
-
-
-                        });
-                    }
-
-
-                    recursiveInherit(args._class,args._extend);
-
-
-
-                }
-
-            }
-
-    }
-
-
-
-    this.inheritNow = function(cb){
-
-        var data = [],
-            exists = {},
-            chain = {};
-
-        var _chain = {} ;
-
-
-        _data.defines.foreach(function(k,v){
-            exists[k] = false;
-            if(v._extend !='GEM.Base' && k.indexOf('GEM.') !== -1){
-                exists[v._extend] =  v._extend !='GEM.Base';
-            }
-
-
-            if(v._extend){
-                data.push({_class : k, _parent : v._extend});
-
-                if(!chain.hasOwnProperty(k)){
-                    _chain[k] = [];
-                }
-                _chain[k].push(v._extend);
-            }
-
-        });
-        var _c = {};
-
-        _data.defines.foreach(function(k,v){
-
-        });
-
-
-        var _list = {} ;
-        var _list1 ={};
-        var _list2 =[];
-        var times = 0;
-        function computeChain(){
-
-            var pass= true;
-
-            data.foreach(function(){
-
-                var _this = this;
-
-
-                data.foreach(function(k1,v1){
-
-
-
-                    _list1[this._class] =  this._parent;
-
-                    if(this._class == _this._class) return;
-
-                    _list = _chain[_this._class];
-
-                    if(_list.indexOf(this._parent) == -1 && _list.indexOf(this._class) != -1){
-
-
-
-
-                        _list.push(this._parent);
-
-
-
-                        computeChain();
-
-                    }
-                });
-                var l = {};
-                l[this._class] = this._parent;
-                if(times == 0){
-                    _list2.push(l);
-                }
-            });
-
-
-            times++;
-        }
-        computeChain();
-
-
-
- var l = [];
-
-        var arrayUnique = function(a) {
-            return a.reduce(function(p, c) {
-                if (p.indexOf(c) < 0) p.push(c);
-                return p;
-            }, []);
-        };
-        var x = arrayUnique(_list2);
-
-        /*
-        var _list2= $.map(_list1, function(value, index) {
-
-            var obj = {};
-            obj[index] = value;
-            l.push(obj);
-            return [value];
-        });
-*/
-
-
-        l.foreach(function(name,parent){
-
-
-            console.log(name + ' -> ' + parent);
-        });
-
-
-        function inherit(_class,_parent){
-
-            _class.prototype.constructor = _class;
-            _class.prototype._parent = _parent;
-
-            _class.prototype.__className  = this._class;
-            _class.prototype.__parentName = this._parent;
-        }
-
-        var int = setInterval(function(){
-            var pass = true;
-            _data.defines.foreach(function(k,v){
-                if((k !='GEM.Base' || v._extend !='GEM.Base')  && k.indexOf('GEM.') !== -1){
-                    exists[k] = false;
-                    exists[v._extend] = false;
-                }
-                exists[k] = GEM.classExists(k);
-                exists[v._extend] = GEM.classExists(v._extend);
-
-                if(exists[k] == false || exists[v] == false){
-                    pass = false;
-                }
-            });
-            if(pass){
-               clearInterval(int);
-
-                data.reverse();
-
-                console.log(data);
-                data.foreach(function(){
-                    console.log(this._class + ' extends ' + this._parent);
-                    var _class = _this.classes[this._class],
-                        _parent = _this.classes[this._parent];
-
-                    try{
-                        _class.prototype = new _parent;
-                    }catch (e){
-                        console.log('exception');
-                        console.log(e);
-                    }
-
-                    _class.prototype.constructor = _class;
-                    _class.prototype._parent = _parent;
-
-                    _class.prototype.__className  = this._class;
-                    _class.prototype.__parentName = this._parent;
-                });
-
-                data.reverse();
-
-                data.foreach(function(){
-
-                    _this.classes[this._class].prototype.constructor = _this.classes[this._class]
-                    _data.classReady[this._class] = true;
-                });
-
-                cb();
-
-
-            }
-        },20);
-
-
-
-
-    }
 
     /**
      *
@@ -390,99 +153,67 @@ window.GEM = (function(d,w){
      */
     this.ready = function(cb){
 
-        _data.callbacks.ready.push(cb);
-
         var ret = null;
 
+        var cid = this.addCallback('ready',cb);
+        var value = '1';
         $(window).load(function(){
 
+            var inte = setInterval(function(){
 
+                var ready = true;
 
-        var inte = setInterval(function(){
-
-            var ready = true;
-
-            _data.requires.foreach(function(){
-                if(this == false) ready = false;
-            });
-
-
-            if(ready){
-                if(_this.loading){
-                    return this.ready(cb);
-                }
-                clearInterval(inte);
-                //  ret = cb.call(GEM);
-
-                var cbs =_data.callbacks.ready;
-
-                GEM.inheritNow(function(){
-
-                    cbs.foreach(function(){
-
-                        var cb
-
-
-                        this.call(GEM);
-
-                        var index = cbs.indexOf(this);
-
-                        Array.prototype.splice.apply(cbs,[index,index+1]);
-                    });
-
+                _data.requires.foreach(function(){
+                    if(this == false) ready = false;
                 });
 
+                if(ready){
 
+                    clearInterval(inte);
 
-            }
-        },20);
+                    GEM.get('ClassManager').inheritNow(function(){
+
+                       GEM.get('ClassManager').fireInitFunctions();
+
+                        cb.call(GEM);
+                    });
+                }
+            },20);
+
         });
-        return ret;
-    };
+        return {
+            then : function(c){
 
+                _data.callbacks.then[cid] = c;
 
-    function create(){
-        var name = arguments[0];
+                if(c !== undefined){
+                    c.call(_this,value);
+                }
 
-        if(_data.classReady[arguments[0]]){
-            var _class = this.getClass(name);
-
-            return _class.apply(new _class,[].slice.call(arguments,1,arguments.length));
-        }
-
-
-        return GEM.create.apply(GEM,arguments);
-
+                return value;
+            }
+        };
     };
 
     this.create = function(){
 
-        var name = arguments[0];
-        var o = {};
+        var _classname = Array.prototype.splice.call(arguments,0,1)[0],
+            _class = this.getClass(_classname)
 
-
-        this.require(name);
-
-
-        return create.apply(this,arguments);
+        return _class === Function ? {} : _class.apply(new _class,arguments);
     };
 
-    this.getClass = function(classname){
+    this.getClass = function(classname) {
 
-        var _class = this.classes[classname];
+        var _class = this.get('ClassManager').getClass(classname);
 
-        if(_class === Function) return _class;
+        return _class !== undefined ? _class : Function;
+    }
 
+    this.getClassIsReady = function(classname){
 
-        this.require(classname);
-
-
-
-
-
-
-        return this.classes[classname];
-    };
+        return _data.classReady.hasOwnProperty(classname) && _data.classReady[classname];
+    }
 
     /**
      *
@@ -505,9 +236,11 @@ window.GEM = (function(d,w){
     };
 
     this.count = function(){
-
         return _data.counter++;
     };
+
+
+
 
 
     Object.defineProperty(Object.prototype,'foreach',{
@@ -519,17 +252,55 @@ window.GEM = (function(d,w){
                 }
             }
             if(this.constructor === Object){
+                var i = 0;
                 for(k in this){
-                    cb.call(this[k],k,this[k]);
+                    cb.call(this[k],k,this[k],i);
+                    i++;
                 }
             }
             return this;
         }
     });
 
+    Array.prototype.move = function (old_index, new_index) {
+        if (new_index >= this.length) {
+            var k = new_index - this.length;
+            while ((k--) + 1) {
+                this.push(undefined);
+            }
+        }
+        this.splice(new_index, 0, this.splice(old_index, 1)[0]);
+        return this; // for testing purposes
+    };
 
+    Array.prototype.clean = function(deleteValue) {
+        for (var i = 0; i < this.length; i++) {
+            if (this[i] == deleteValue) {
+                this.splice(i, 1);
+                i--;
+            }
+        }
+        return this;
+    };
 
+    Object.defineProperty(Object.prototype,'exact',{
+        value: function(state){
+            return this === state;
+        }
+    });
+
+    function addBase(scriptname){
+        var sc = document.createElement('script');
+        sc.async = false;
+        sc.src = _this.getScript(scriptname);
+        var s = document.getElementsByTagName('script')[0];
+        s.parentNode.insertBefore(sc, s);
+    }
+
+    addBase('GEM.manager.ClassManager');
+    addBase('app');
 
     return this;
 
 }).call(new (function GEM(){}),document,window);
+
