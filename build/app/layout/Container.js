@@ -9,57 +9,27 @@ GEM.define('GEM.layout.Container',{
 
     _class :  function Container(){
 
-        var _this = this;
+        this.__construct = function(){
 
-        var getSuffix =  function(prop){
+            this.$ = jQuery('<'+this.type+' />',this.attr);
+        };
 
-            switch(prop){
-                case 'width' :
-                case 'height' :
-                case 'left' :
-                case 'right' :
-                case 'top' :
-                case 'bottom': return 'px';
-                default : return '';
+        this._defaults = {
+            type : 'div',
+            attr : {
+                'class' : 'container',
+                'data-id' : this._id,
+            },
+            css: {
+                position: 'relative',
+                top  : 0,
+                right: 0
             }
-        }
-
-        this.css = {
-            'left' : 1,
-            'right' : 2,
         };
 
 
-        this.$ = jQuery('<'+this.type+' />',this.attr);
 
 
-
-        this.bindDOM = function(name){
-
-           var define = function(){
-
-               Object.defineProperty(_this,name, {
-                   set : function (prop) {
-                       if(this.$ !== undefined){
-                           this.$.css(name,prop+getSuffix(prop));
-                       }
-                       this.css[name] = prop;
-                   },
-                   get : function () {
-                       return this.css[name];
-                   }
-               });
-           }
-
-            this.css.foreach(function(name,value){
-                 define(name);
-                _this[name] = value;
-            });
-        };
-
-        console.log(this);
-
-
-        return this.super(arguments);
+        return this;
     }
 });

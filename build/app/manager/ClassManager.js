@@ -1,8 +1,5 @@
 
-this.ClassManager = new (function ClassManager(){
-
-
-
+new (function ClassManager(){
 
     var _data = GEM.getData(),
         _this  = this;
@@ -58,7 +55,7 @@ this.ClassManager = new (function ClassManager(){
             _data.loading = true;
 
             if(callback !== undefined){
-                this.addCallback(callback);
+                GEM.get('SystemManager').addCallback(callback);
             }
 
             require.call(_this,this,callback);
@@ -132,11 +129,11 @@ this.ClassManager = new (function ClassManager(){
 
 
 
-    this.fireInitFunctions = function(_c){
+    this.fireInitFunctions = function(){
 
         _data.defines.foreach(function(){
             if(this.hasOwnProperty('_init')){
-                this._init();
+                this._init.apply(new this._class,arguments);
             }
         });
     };
@@ -147,6 +144,8 @@ this.ClassManager = new (function ClassManager(){
         var _extend = [],
             _exists = {},
             _inherit = {};
+
+        _this.data = GEM.getData();
 
         _inherit['GEM.Base'] = {_class : 'GEM.Base'};
 
@@ -170,21 +169,37 @@ this.ClassManager = new (function ClassManager(){
                 _extend.unshift(add);
             });
 
-            function orderClassParentList(){
+            do{
+                var reloop = false,
+                    passed = false;
+
                 _extend.foreach(function(i){
-                    var _elem = this;
-                    _extend.foreach(function(i2){
-                        if(_elem._class == this._parent && i2 > i){
-                            _extend.move(_extend.indexOf(this),_extend.indexOf(_elem));
-                            orderClassParentList()
-                        }
-                    });
+                    if(!reloop){
+                         reloop = orderClassParentList(this,reloop)
+                    }
                 });
 
-                return _extend;
+            }while(reloop);
+
+            passed = true;
+
+            function orderClassParentList(elem,reloop){
+
+                if(passed) return _extend;
+
+                var i = _extend.indexOf(elem);
+
+                _extend.foreach(function(i2){
+                    if(elem._class == this._parent && i2 > i && reloop == false){
+                        reloop = true;
+                            _extend.move(_extend.indexOf(this),_extend.indexOf(elem));
+                    }
+                });
+
+                return reloop;
             }
 
-            return orderClassParentList();
+            return _extend;
         }
 
 
@@ -231,13 +246,17 @@ this.ClassManager = new (function ClassManager(){
                     try{
                         _class.prototype = new _parent;
 
-                    }catch (e){}
+                    }catch (e){
 
+                        var x = e;
+
+                    }
+                    
                     _class.prototype.constructor = _class;
-                    _class.prototype._parent = _parent;
+                    _class.prototype._parent = _parent.prototype;
 
-                    _class.prototype.__className  = this._class;
-                    _class.prototype.__parentName = this._parent;
+                    _class.prototype._className  = this._class;
+                    _class.prototype._parentName = this._parent;
                 });
 
                 _extend.reverse();
@@ -254,6 +273,55 @@ this.ClassManager = new (function ClassManager(){
             }
         },20);
     }
+
+    /**
+     *
+     * @param cb
+     */
+    this.ready = function(cb){
+
+        var ret = null;
+
+        var cid =  GEM.get('SystemManager').addCallback('ready',cb);
+
+        var value = '1';
+        $(window).load(function(){
+
+            var inte = setInterval(function(){
+
+                var ready = true;
+
+                _data.requires.foreach(function(){
+                    if(this == false) ready = false;
+                });
+
+                if(ready){
+
+                    clearInterval(inte);
+
+                    _this.inheritNow(function(){
+
+                        _this.fireInitFunctions();
+
+                        cb.call(GEM);
+                    });
+                }
+            },20);
+
+        });
+        return {
+            then : function(c){
+
+                _data.callbacks.then[cid] = c;
+
+                if(c !== undefined){
+                    c.call(_this,value);
+                }
+
+                return value;
+            }
+        };
+    };
 
     GEM.set('ClassManager',this);
 

@@ -7,41 +7,95 @@ GEM.define('GEM.layout.Component',{
 
     _class :  function Component(){
 
+        this._defaults = {
+            type : 'div',
+            attr : {
+                'data-id' : this._id,
+            },
+            css: {
+                position: 'relative',
+                top  : 0,
+                right: 0
+            }
+        };
+
+        this.css = {};
+        this.attr = {};
+        this.data = {};
+        this.components = {};
 
 
-        this.css = {
-                'left' : 2,
-                'right' : 3,
+        var _this = this;
+
+        this.__construct = function(){
 
         };
 
 
+
+        var getSuffix =  function(prop){
+
+            switch(prop){
+                case 'width' :
+                case 'height' :
+                case 'left' :
+                case 'right' :
+                case 'top' :
+                case 'bottom': return 'px';
+                default : return '';
+            }
+        }
+
+
+
+
+
         this.add = function(name,component){
 
-            this.setComponent(name,component);
+            this.set(name,component);
 
             component.parent = this;
 
             this.$.append(component.$);
         };
 
-        this.setComponent = function(n,c){
-            _cmp[n] = c;
+        this.set = function(n,c){
+            this.components[n] = c;
         };
 
-        this.getComponent = function(c){
-            return _cmp[c];
+        this.get = function(c){
+            return this.components[c];
         };
 
         this.listComponents = function(c){
-            _cmp.foreach(function(k){
+            this.components.foreach(function(k){
                 console.log(k);
             });
-            return _cmp[c];
+            return this.components[c];
         };
 
+        this.bindDOM = function(name){
+            Object.defineProperty(_this,name, {
+                set : function (prop) {
+                    if(this.$ !== undefined){
+                        this.$.css(name,prop+getSuffix(prop));
+                    }
+                    this.css[name] = prop;
+                },
+                get : function () {
+                    return this.css[name];
+                }
+            });
 
-        return this.super(arguments);;
+        };
+
+        this.css.foreach(function(name,value){
+            _this.bindDOM(name);
+            _this[name] = value;
+        });
+
+
+        return this;
     }
     }
 )

@@ -31,7 +31,7 @@ window.GEM = (function(d,w){
         },
         counter : 0,
         classes : [],
-        service : [],
+        service : {},
         included :[],
         required :{},
         requires :{},
@@ -48,7 +48,7 @@ window.GEM = (function(d,w){
     };
 
     var _this = this;
-
+    this.cache = [];
     this.getData = function(){
         var c = {};
         for(var i in _data){
@@ -98,44 +98,9 @@ window.GEM = (function(d,w){
         }
     };
 
-
-
-    this.getCallback = function(id){
-
-        var callback = _data.callbacks.list[id];
-
-        if(callback !== undefined && callback.constructor === Function ){
-            return _data.callbacks.list[id]
-        }
-        return function(){};
+    this.count = function(){
+        return this.get('SystemManager').count();
     };
-
-
-    this.addCallback = function() {
-
-        var cid = this.count();
-
-        if (arguments[0] !== undefined){
-
-            return cid;
-        }
-
-        if (arguments[0] === String) {
-
-            if (!_data.callbacks.hasOwnProperty(arguments[0])) {
-
-                _data.callbacks[arguments[0]] = [];
-            }
-            return _data.callbacks[arguments[0]][cid] = arguments[1];
-        }
-
-        if (arguments[0].constructor === Function) {
-
-            return _data.callbacks[cid] = arguments[0];
-        }
-    }
-
-
     this.require = function(){
 
         return this.get('ClassManager').require.apply(this.get('ClassManager'),arguments);
@@ -146,62 +111,31 @@ window.GEM = (function(d,w){
         return this.get('ClassManager').define.apply(this.get('ClassManager'),arguments);
     };
 
+    this.ready = function(){
 
-    /**
-     *
-     * @param cb
-     */
-    this.ready = function(cb){
-
-        var ret = null;
-
-        var cid = this.addCallback('ready',cb);
-        var value = '1';
-        $(window).load(function(){
-
-            var inte = setInterval(function(){
-
-                var ready = true;
-
-                _data.requires.foreach(function(){
-                    if(this == false) ready = false;
-                });
-
-                if(ready){
-
-                    clearInterval(inte);
-
-                    GEM.get('ClassManager').inheritNow(function(){
-
-                       GEM.get('ClassManager').fireInitFunctions();
-
-                        cb.call(GEM);
-                    });
-                }
-            },20);
-
-        });
-        return {
-            then : function(c){
-
-                _data.callbacks.then[cid] = c;
-
-                if(c !== undefined){
-                    c.call(_this,value);
-                }
-
-                return value;
-            }
-        };
+        return this.get('ClassManager').ready.apply(this.get('ClassManager'),arguments);
     };
 
     this.create = function(){
 
         var _classname = Array.prototype.splice.call(arguments,0,1)[0],
             _class = this.getClass(_classname)
+        if(_class === Function)  return {};
+        var o = new _class;
+        o._id = this.count();
 
-        return _class === Function ? {} : _class.apply(new _class,arguments);
+        this.toObjectCache(o._id,o);
+        o.super(arguments);
+
+
+        return  o;
     };
+
+    this.toObjectCache = function(k,v){
+
+        if(v !== undefined)
+        this.cache[k] = v;
+    }
 
     this.getClass = function(classname) {
 
@@ -235,9 +169,6 @@ window.GEM = (function(d,w){
         _data.service[name] = service;
     };
 
-    this.count = function(){
-        return _data.counter++;
-    };
 
 
 
@@ -297,6 +228,7 @@ window.GEM = (function(d,w){
         s.parentNode.insertBefore(sc, s);
     }
 
+    addBase('GEM.manager.SystemManager');
     addBase('GEM.manager.ClassManager');
     addBase('app');
 

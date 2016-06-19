@@ -6,14 +6,15 @@ GEM.define('GEM.layout.Button',{
 
         _class :  function Button(){
 
-            this.css = {
-                'left' : 2,
-                'right' : 3
+            this.__construct = function(){
+
+                this.attr['data-uid'] = this._uid;
+                this.$ = jQuery('<'+this.type+' />',this.attr);
             };
 
 
 
-            return this.super(arguments);;
+            return this;;
         }
     }
 )

@@ -4,7 +4,7 @@ if(window.GEM !== undefined) {
 
     GEM.define('GEM.pr0gramm.Spoiler', {
 
-        _extend: 'GEM.layout.UI',
+        _extend: 'GEM.Base',
 
         _class: function Spoiler() {
 
