@@ -119,14 +119,15 @@ window.GEM = (function(d,w){
     this.create = function(){
 
         var _classname = Array.prototype.splice.call(arguments,0,1)[0],
-            _class = this.getClass(_classname)
+            _class = this.getClass(_classname);
+
         if(_class === Function)  return {};
-        var o = new _class;
+
+
+        var o = _class.apply(Object.create(_class.prototype),arguments);
         o._id = this.count();
-
+        o.init.apply(o,arguments);
         this.toObjectCache(o._id,o);
-        o.super(arguments);
-
 
         return  o;
     };

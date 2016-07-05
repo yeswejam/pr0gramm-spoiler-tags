@@ -9,7 +9,6 @@ GEM.define('GEM.layout.Panel',{
         _class :  function Panel(){
 
 
-
             return this;
         }
     }

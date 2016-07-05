@@ -20,14 +20,14 @@
                 this.application = application;
                 this.$ = $;
 
-                GEM.set(application,this);
+                GEM.app = this;
 
                 var gui = this.set('gui',this.create('GEM.layout.Panel',{
                     attr: {
                       'class' : 'vo1d-panel'
                     },
                     css : {
-                        position : 'fixed',
+                        position : 'absolute',
                         right : 0,
                         width : 300
                     }
@@ -51,6 +51,7 @@
 
                 add(gui);
 
+                return this;
             };
 
 

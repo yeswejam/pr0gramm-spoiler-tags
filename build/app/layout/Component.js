@@ -5,39 +5,22 @@ GEM.define('GEM.layout.Component',{
     _extend : 'GEM.Base',
 
 
-    _class :  function Component(){
+    _defaults : {
 
-
-        this.attr ={
+        attr: {
             'data-id' : this._id,
-        };
-
-        this.css = {
+        },
+        css: {
             position: 'relative',
             top  : 0,
             right: 0
-        };
-
-
-        this.data = {};
-        this.components = {};
-
-
-        var getSuffix =  function(prop){
-
-            switch(prop){
-                case 'width' :
-                case 'height' :
-                case 'left' :
-                case 'right' :
-                case 'top' :
-                case 'bottom': return 'px';
-                default : return '';
-            }
         }
+    },
+    _class :  function Component(){
 
+        var _this = this;
 
-
+        this.components = {};
 
 
         this.add = function(name,component){
@@ -63,30 +46,8 @@ GEM.define('GEM.layout.Component',{
             });
             return this.components[c];
         };
-/*
-        this.bindDOM = function(name){
-            Object.defineProperty(_this,name, {
-                set : function (prop) {
-                    if(this.$ !== undefined){
-                        this.$.css(name,prop+getSuffix(prop));
-                    }
-                    this.css[name] = prop;
-                },
-                get : function () {
-                    return this.css[name];
-                }
-            });
 
-        };
 
-        this.css.foreach(function(name,value){
-            _this.bindDOM(name);
-            _this[name] = value;
-        });
-
-*/
-
-        this.$ = jQuery('<'+this.type+' />',this.attr);
 
         return this;
     }

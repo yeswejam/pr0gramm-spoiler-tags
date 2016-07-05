@@ -317,7 +317,8 @@ new (function ClassManager(){
                     if(this._class == 'GEM.Base') return;
 
                     var _class  = _this.classes[this._class],
-                        _parent = _this.classes[this._parent];
+                        _parent = _this.classes[this._parent],
+                        _meta   = _this.data.defines[this._class];
 
                     try{
 
@@ -330,9 +331,29 @@ new (function ClassManager(){
 
                     }
 
-
                     _class.prototype._className  = this._class;
                     _class.prototype._parentName = this._parent;
+
+                    var defaults = {};
+
+
+
+                    _class.prototype._defaults = (function mergeDefaults(p){
+
+                        $.extend(true,defaults,p._defaults,_meta._defaults);
+
+                        var c = _this.getClass('GEM.BaseWrapper');
+
+
+                        if(p !== c && p.hasOwnProperty('__proto__')){
+
+                            return mergeDefaults(p.__proto__.constructor.prototype);
+                        }
+
+                        return defaults;
+
+                    })(_parent.prototype);
+
                 });
 
               /*  _extend.reverse();

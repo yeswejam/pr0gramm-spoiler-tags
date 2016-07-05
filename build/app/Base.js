@@ -16,6 +16,7 @@ if(window.GEM !== undefined) {
         var BaseWrapper = function BaseWrapper(){
 
 
+
             return this;
         };
 
@@ -23,25 +24,18 @@ if(window.GEM !== undefined) {
 
             this.parents = [];
             this.data = {};
+            this.data.arguments = arguments;
 
-
-            this.getClassName = function(){
-
-                return this._className;
-            };
-            this.getParentName = function(){
-
-                return this._parentName;
-            };
-
-            this.getParentClass = function(){
-
-                return GEM.getClass(this.getParentName());
-            };
 
             this.create = function(){
 
-               return GEM.create.apply(GEM,arguments);
+                var o = GEM.create.apply(GEM,arguments);
+
+                var arg = [true, this].concat(args.call(arguments));
+
+                $.prototype.extend.apply(o,arg);
+
+               return o;
             };
 
             this.get = function(key){
@@ -55,10 +49,11 @@ if(window.GEM !== undefined) {
             };
 
 
+            var arg = [true, this,this._defaults].concat(args.call(arguments));
 
+            $.prototype.extend.apply(this,arg);
 
-            extend.apply(this,arguments);
-
+            console.log(arg);
             return this;
         };
 
@@ -76,15 +71,53 @@ if(window.GEM !== undefined) {
             return jQuery.prototype.extend.apply(this, ext);
         };
 
+        wrapper.prototype.init = function(){
+
+            var arg = [true, this].concat(args.call(this.data.arguments));
+
+            $.prototype.extend.apply(this,arg);
+   /*         console.log(this.getParentName());
+            console.log(GEM.getClass(this.getParentName()));
+            console.log(GEM.getClass(this.getParentName()).prototype);
+            console.log(GEM.getClass(this.getParentName()).prototype.__proto__);
+
+*/
+            if(undefined !== this.getParentClass().prototype.__proto__.getClassName()){
+                this.getParentClass().prototype.__proto__.init.call(this);
+            }
+
+
+
+
+            return this._className;
+        };
+
+
+
+        wrapper.prototype.getClassName = function(){
+
+            return this._className;
+        };
+        wrapper.prototype.getParentName = function(){
+
+            return this._parentName;
+        };
+        wrapper.prototype.getParentClass = function(){
+
+            return GEM.getClass(this.getParentName()).prototype.__proto__.constructor;
+        };
+
+
+
 
         function recursiveConstruct(_self,obj,arg){
 
             if(obj.hasOwnProperty('_parent') && obj._className !== 'GEM.Base'){
 
                 var args = obj.data.__args;
-
+/*
                 console.log(obj._className);
-                console.log(obj._defaults);
+                console.log(obj._defaults);*/
                 arg.unshift(obj._defaults);
                 /*
                 obj.constructor.apply(_self,args);
@@ -104,6 +137,8 @@ if(window.GEM !== undefined) {
 
         base.prototype = new BaseWrapper();
         base.prototype.constructor = base;
+
+
 
     })();
 
