@@ -3,10 +3,8 @@ GEM.define('GEM.manager.ComponentManager',{
     _extend : 'GEM.Base',
     _class :  function ComponentManager(){
 
-        this.__construct = function(){
 
-        };
-
+        this.components = [];
 
         this.add = function(name,component){
 
@@ -17,7 +15,7 @@ GEM.define('GEM.manager.ComponentManager',{
         };
 
         this.set = function(n,c){
-            this.components[n] = c;
+            return this.components[n] = c;
         };
 
         this.get = function(c){
@@ -30,8 +28,6 @@ GEM.define('GEM.manager.ComponentManager',{
             });
             return this.components[c];
         };
-
-
         return this;
     }
 });

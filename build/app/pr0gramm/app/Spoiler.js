@@ -8,6 +8,9 @@ if(window.GEM !== undefined) {
 
         _class: function Spoiler() {
 
+            this.super();
+
+
             this.layer = [],
 
                 this.storage = GEM.get('storage');
@@ -119,8 +122,7 @@ if(window.GEM !== undefined) {
                     $('.item-tags').trigger('DOMNodeInserted');
                 }
             }
-
-            return this.super(arguments)
+            return this;
         }
     })
 }

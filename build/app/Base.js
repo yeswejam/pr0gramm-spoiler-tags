@@ -8,30 +8,36 @@ if(window.GEM !== undefined) {
         var extend = function () {
 
             var arg = [true, this].concat(args.call(arguments));
-            console.log(arg);
-            return jQuery.prototype.extend.apply(this,arg);
+
+                return $.prototype.extend.apply(this,arg);
+
         };
 
-        var BaseWrapper = function BaseWrapper(){return this;};
+        var BaseWrapper = function BaseWrapper(){
+
+
+            return this;
+        };
 
         var Base = function Base(){
-            var _this = this;
 
-            this.constructed = false;
             this.parents = [];
             this.data = {};
-
-
 
 
             this.getClassName = function(){
 
                 return this._className;
-            }
+            };
             this.getParentName = function(){
 
                 return this._parentName;
-            }
+            };
+
+            this.getParentClass = function(){
+
+                return GEM.getClass(this.getParentName());
+            };
 
             this.create = function(){
 
@@ -40,16 +46,19 @@ if(window.GEM !== undefined) {
 
             this.get = function(key){
 
-                return this.data[key];
+
+                return key === undefined ? this.data : this.data[key];
             };
             this.set = function(key,value){
 
-                this.data[key]=value;
+               return  this.data[key]=value;
             };
 
-            this.testMethod = function(){
-                return null;
-            }
+
+
+
+            extend.apply(this,arguments);
+
             return this;
         };
 
@@ -59,58 +68,14 @@ if(window.GEM !== undefined) {
 
 
 
-        wrapper.prototype.super = function(){
-
-            var arg = args.call(arguments[0]);
-
-            if(arguments[1] !== undefined){
-                arg.push(arguments[1]);
-            }
-            recursiveConstruct(this,this._parent,arg);
-
-
-
-            arg.clean(undefined);
-
-            extend.apply(this,arg);
-
-            this._id = GEM.count();
-
-            GEM.toObjectCache(this._id,this);
-
-            this.data.__args = arg;
-
-            //if(!this.constructed){
-
-            this.__construct(arg);
-
-          //  }
-
-            return  this;
-        }
-
-        wrapper.prototype.defaults = function(){
-
-            return extend.apply(this,[].concat(args.call(arguments[0])));
-        }
-
         wrapper.prototype.extend = function () {
 
             var arg = this.args.call(arguments[0]);
             var ext = [true, this].concat(arg);
 
-
             return jQuery.prototype.extend.apply(this, ext);
         };
 
-        wrapper.prototype.__construct = function(){};
-        wrapper.prototype.__parentConstruct = function(){
-
-            if(!this.constructed && !this._parent.constructed) {
-
-                //recursiveConstruct(this,this._parent);
-            }
-        };
 
         function recursiveConstruct(_self,obj,arg){
 

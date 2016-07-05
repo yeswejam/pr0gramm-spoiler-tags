@@ -6,21 +6,16 @@ GEM.define('GEM.layout.panel.Body',{
 
         _class :  function PanelBody(){
 
-            this._defaults = {
-                type : 'div',
-                attr : {
-                    'class' : 'panel-body',
-                },
-                css: {
-                    position: 'relative',
-                    top  : 0,
-                    right: 22
-                }
+            this.attr = {
+                'class' : 'panel-body',
             };
-            this.__construct = function(){
 
-                this.$ = jQuery('<'+this.type+' />',this.attr);
+            this.css =  {
+                position: 'relative',
+                top  : 0,
+                right: 22
             };
+
 
 
 

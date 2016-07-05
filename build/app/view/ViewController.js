@@ -7,11 +7,13 @@ GEM.define('GEM.view.ViewController',{
         _class :  function ViewController(){
 
             this.css = {
-                'left' : 2,
+                'left'  : 2,
                 'right' : 3
             };
 
-            return this.super(arguments);;
+            this.$ = jQuery('<'+this.type+' />',this.attr);
+
+            return this;
         }
     }
 );

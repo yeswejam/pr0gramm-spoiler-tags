@@ -10,12 +10,10 @@
 
         _init : function(){
 
-            this.init('pr0gramm',jQuery);
+           this.init('pr0gramm',jQuery);
         },
         _class :  function UI(){
 
-
-            var _this = this;
 
             this.init = function (application,$) {
 
@@ -24,7 +22,7 @@
 
                 GEM.set(application,this);
 
-                this.gui = this.create('GEM.layout.Panel',{
+                var gui = this.set('gui',this.create('GEM.layout.Panel',{
                     attr: {
                       'class' : 'vo1d-panel'
                     },
@@ -33,16 +31,16 @@
                         right : 0,
                         width : 300
                     }
-                });
-                console.log(this.gui);
-                this.gui.add('head',this.create('GEM.layout.panel.Head',{
+                }));
+
+                gui.add('head',this.create('GEM.layout.panel.Head',{
                     css : {
                         position : 'fixed',
                         right : 0,
                         width : 300
                     }
                 }));
-                this.gui.add('body',this.create('GEM.layout.panel.Body',{
+                gui.add('body',this.create('GEM.layout.panel.Body',{
                     css : {
                         position : 'fixed',
                         right : 0,
@@ -51,19 +49,16 @@
                 }));
 
 
-                add(this.gui);
+                add(gui);
 
             };
 
 
-        var add = function(component){
+            var add = function(component){
 
-            jQuery('body').append(component.$);
-        };
+                jQuery('body').append(component.$);
+            };
+            return this;
 
-
-
-
-        return this;
     }
 });

@@ -2,19 +2,17 @@
 
 GEM.define('GEM.layout.Button',{
 
-        _extend : 'GEM.layout.Component',
+        _extend : 'GEM.layout.Container',
 
         _class :  function Button(){
 
-            this.__construct = function(){
 
-                this.attr['data-uid'] = this._uid;
-                this.$ = jQuery('<'+this.type+' />',this.attr);
+            this.css = {
+                border :'1px solid grey'
             };
 
 
-
-            return this;;
+            return this;
         }
     }
 )

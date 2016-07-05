@@ -10,15 +10,6 @@ GEM.define('GEM.layout.Panel',{
 
 
 
-
-            this.__construct = function(){
-
-                this.$ = jQuery('<'+this.type+' />',this.attr);
-
-            };
-
-
-
             return this;
         }
     }

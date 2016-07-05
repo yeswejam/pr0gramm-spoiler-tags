@@ -7,30 +7,20 @@ GEM.define('GEM.layout.Component',{
 
     _class :  function Component(){
 
-        this._defaults = {
-            type : 'div',
-            attr : {
-                'data-id' : this._id,
-            },
-            css: {
-                position: 'relative',
-                top  : 0,
-                right: 0
-            }
+
+        this.attr ={
+            'data-id' : this._id,
         };
 
-        this.css = {};
-        this.attr = {};
+        this.css = {
+            position: 'relative',
+            top  : 0,
+            right: 0
+        };
+
+
         this.data = {};
         this.components = {};
-
-
-        var _this = this;
-
-        this.__construct = function(){
-
-        };
-
 
 
         var getSuffix =  function(prop){
@@ -73,7 +63,7 @@ GEM.define('GEM.layout.Component',{
             });
             return this.components[c];
         };
-
+/*
         this.bindDOM = function(name){
             Object.defineProperty(_this,name, {
                 set : function (prop) {
@@ -94,6 +84,9 @@ GEM.define('GEM.layout.Component',{
             _this[name] = value;
         });
 
+*/
+
+        this.$ = jQuery('<'+this.type+' />',this.attr);
 
         return this;
     }

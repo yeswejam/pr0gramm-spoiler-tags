@@ -98,6 +98,22 @@ new (function ClassManager(){
     }
 
 
+    function createConstructFunction(args){
+
+        function getConstructString(){
+            return  '\n' +
+                '\t\tvar args = [].slice.call(arguments,1); \n' +
+                '\t\tvar _parent = GEM.getClass("'+args._extend+'"); \n' +
+                '\t\t_parent.apply(this,arguments);'
+        }
+        var _fn      = args._class.toString().trim(),
+            _fnregx  = /^function\s([a-zA-Z]+)(.*?)\{/.exec(_fn),
+            _fnName  = _fnregx[1],
+            _func    = _fn.replace(_fnregx[0],'return '+ _fnregx[0]+ getConstructString());
+
+        return args._class = new Function(_fnName,_func)( args._class);
+    }
+
     this.define = function(name,args){
 
         var defines  = _data.defines,
@@ -109,9 +125,8 @@ new (function ClassManager(){
             return ;
         }
         _data.defines[name] = args;
-        _this.setClass(name, args._class);
 
-
+        _this.setClass(name, createConstructFunction(args));
 
         if(undefined !== _require){
             _require = _require.constructor === Array ? _require : [_require];
@@ -143,7 +158,9 @@ new (function ClassManager(){
 
         var _extend = [],
             _exists = {},
-            _inherit = {};
+            _chain = {},
+            _inherit = {},
+            _extendList = {};
 
         _this.data = GEM.getData();
 
@@ -158,6 +175,15 @@ new (function ClassManager(){
                     _exists[v._extend] =  v._extend !='GEM.Base';
                 }
                 _inherit[k] = {_class : k, _parent : v._extend};
+
+                if(v._extend){
+
+
+                    if(!_chain.hasOwnProperty(k)){
+                        _chain[k] = [];
+                    }
+                    _chain[k].push(_inherit[k]._parent);
+                }
             });
         }
 
@@ -169,7 +195,56 @@ new (function ClassManager(){
                 _extend.unshift(add);
             });
 
+
+            function chain(_class,_chain){
+
+                if(!_extendList.hasOwnProperty(_class)) {
+
+                    _extendList[_class] = new String(_class);
+                }
+                if(_chain.hasOwnProperty('_parent') && _chain._parent.length){
+
+                    if(_extendList[_class].indexOf(_chain._class) != -1 && _extendList[_class].indexOf(_chain._parent) == -1){
+
+                        _extendList[_class] +='|'+_chain._parent;
+                    }
+                }
+            }
+
+
+
+            function makeChain(key){
+
+                if(_inherit[key]._class == key && _extendList[key].indexOf(_inherit[key]._parent) == -1){
+
+                    _extendList[key] +='|'+_inherit[key]._parent;
+                }else{
+
+                    var level = _inherit[_inherit[key]._parent];
+
+                    if(_inherit[level] !== undefined && _inherit[level].hasOwnProperty('_parent')){
+                        makeChain(_inherit[level]);
+                    }
+                }
+            }
+
+            var pass = 0;
+            function _makeClassChain(){
+
+                _inherit.foreach(function (k,v) {
+                    pass += chain(k,v);
+
+                    _inherit.foreach(function (k1,v1) {
+                        pass += chain(k1,v1);
+                    });
+                });
+            }
+            _makeClassChain();
+
+
+
             do{
+
                 var reloop = false,
                     passed = false;
 
@@ -230,13 +305,14 @@ new (function ClassManager(){
 
             collect();
 
+
             if(validate()){
 
                 var _extend = reposition();
 
                 _extend.reverse();
 
-                _extend.foreach(function(){
+                _extend.foreach(function(i){
 
                     if(this._class == 'GEM.Base') return;
 
@@ -244,32 +320,34 @@ new (function ClassManager(){
                         _parent = _this.classes[this._parent];
 
                     try{
-                        _class.prototype = new _parent;
+
+                        _class.prototype = Object.create(_parent.prototype);
+                        _class.prototype.constructor = _class;
 
                     }catch (e){
 
                         var x = e;
 
                     }
-                    
-                    _class.prototype.constructor = _class;
-                    _class.prototype._parent = _parent.prototype;
+
 
                     _class.prototype._className  = this._class;
                     _class.prototype._parentName = this._parent;
                 });
 
-                _extend.reverse();
+              /*  _extend.reverse();
 
                 _extend.foreach(function(){
 
-                    _this.classes[this._class].prototype.constructor = _this.classes[this._class];
+                   // _this.classes[this._class].prototype.constructor = _this.classes[this._class];
 
                     _data.classReady[this._class] = true;
                 });
+*/
 
-                _c();
                 clearInterval(int);
+                _c();
+
             }
         },20);
     }
