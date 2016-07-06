@@ -67,25 +67,18 @@ new (function ClassManager(){
 
             _data.requires[scriptSource] = false;
 
-            $.getScript(scriptSource).done(function( script ) {
+            var sc =  document.createElement('script');
 
-                var x = '2';
-                eval(script);
+            sc.onload =  function (e) {
+                 _data.requires[this.src] = true;
+            };
+            document.getElementsByTagName('body')[0].appendChild(sc);
 
-                _data.requires[scriptSource] = true;
-
-                if(typeof cb == 'function' ){
-
-                    cb.call(_this);
-                }
-
-            }).fail(function( jqxhr, settings, exception ) {
-                console.log( 'error' ); // 200
-                console.log( exception); // 200
-            });
+            sc.setAttribute('type','text/javascript');
+            sc.setAttribute('src',scriptSource );
 
             return this;
-        }
+        };
 
         return GEM;
     };
@@ -250,7 +243,7 @@ new (function ClassManager(){
 
                 _extend.foreach(function(i){
                     if(!reloop){
-                         reloop = orderClassParentList(this,reloop)
+                        reloop = orderClassParentList(this,reloop)
                     }
                 });
 
@@ -267,7 +260,7 @@ new (function ClassManager(){
                 _extend.foreach(function(i2){
                     if(elem._class == this._parent && i2 > i && reloop == false){
                         reloop = true;
-                            _extend.move(_extend.indexOf(this),_extend.indexOf(elem));
+                        _extend.move(_extend.indexOf(this),_extend.indexOf(elem));
                     }
                 });
 
@@ -356,15 +349,15 @@ new (function ClassManager(){
 
                 });
 
-              /*  _extend.reverse();
+                /*  _extend.reverse();
 
-                _extend.foreach(function(){
+                 _extend.foreach(function(){
 
-                   // _this.classes[this._class].prototype.constructor = _this.classes[this._class];
+                 // _this.classes[this._class].prototype.constructor = _this.classes[this._class];
 
-                    _data.classReady[this._class] = true;
-                });
-*/
+                 _data.classReady[this._class] = true;
+                 });
+                 */
 
                 clearInterval(int);
                 _c();

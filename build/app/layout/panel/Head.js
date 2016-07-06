@@ -5,7 +5,6 @@ GEM.define('GEM.layout.panel.Head',{
         _extend : 'GEM.layout.Container',
 
         _defaults : {
-            type : 'span',
             attr: {
                 'class' : 'panel-head',
             },

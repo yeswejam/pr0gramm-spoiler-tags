@@ -27,24 +27,30 @@
                       'class' : 'vo1d-panel'
                     },
                     css : {
-                        position : 'absolute',
+                        position : 'fixed',
+                        top : 20,
                         right : 0,
-                        width : 300
+                        height : 300,
+                        width : 300,
+                        background : '#fff',
+                        'z-index' : 999
                     }
                 }));
 
                 gui.add('head',this.create('GEM.layout.panel.Head',{
                     css : {
-                        position : 'fixed',
+                        position : 'relative',
                         right : 0,
-                        width : 300
+                        width : 300,
+                        background : '#c4c4c4'
                     }
                 }));
                 gui.add('body',this.create('GEM.layout.panel.Body',{
                     css : {
-                        position : 'fixed',
+                        position : 'relative',
                         right : 0,
-                        width : 300
+                        width : 300,
+                        background : '#c4c4c4'
                     }
                 }));
 

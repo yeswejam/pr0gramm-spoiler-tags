@@ -4,14 +4,14 @@ GEM.define('GEM.manager.ComponentManager',{
     _class :  function ComponentManager(){
 
 
-        this.components = [];
+        this.components = {};
 
         this.add = function(name,component){
 
             this.set(name,component);
 
             component.parent = this;
-            this.$.append(component.$);
+            this.append(component);
         };
 
         this.set = function(n,c){

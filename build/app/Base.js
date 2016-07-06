@@ -49,11 +49,10 @@ if(window.GEM !== undefined) {
             };
 
 
-            var arg = [true, this,this._defaults].concat(args.call(arguments));
+            var arg = [true, this.data,this._defaults].concat(args.call(arguments));
 
-            $.prototype.extend.apply(this,arg);
+            $.prototype.extend.apply(this.data,arg);
 
-            console.log(arg);
             return this;
         };
 
@@ -73,19 +72,9 @@ if(window.GEM !== undefined) {
 
         wrapper.prototype.init = function(){
 
-            var arg = [true, this].concat(args.call(this.data.arguments));
+            var arg = [true, this.data].concat(args.call(this.data.arguments));
 
-            $.prototype.extend.apply(this,arg);
-   /*         console.log(this.getParentName());
-            console.log(GEM.getClass(this.getParentName()));
-            console.log(GEM.getClass(this.getParentName()).prototype);
-            console.log(GEM.getClass(this.getParentName()).prototype.__proto__);
-
-*/
-            if(undefined !== this.getParentClass().prototype.__proto__.getClassName()){
-                this.getParentClass().prototype.__proto__.init.call(this);
-            }
-
+            $.prototype.extend.apply(this.data,arg);
 
 
 

@@ -5,7 +5,6 @@ GEM.define('GEM.layout.panel.Body',{
     _extend : 'GEM.layout.Container',
 
     _defaults : {
-        type : 'div',
         attr: {
             'class' : 'panel-body',
         },

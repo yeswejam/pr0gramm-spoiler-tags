@@ -16,20 +16,37 @@ GEM.define('GEM.layout.Component',{
             right: 0
         }
     },
+    _init : function(){
+
+        this.init();
+    },
     _class :  function Component(){
 
         var _this = this;
 
         this.components = {};
 
+        this.init = function(){
+
+            _parent.prototype.init.call(this);
+
+            this.$ = jQuery('<'+this.data.type+' />',this.data.attr);
+            this.$.css(this.data.css);
+
+            $.extend(true,this.__proto__, this.$);
+
+            return this;
+        };
+
+
 
         this.add = function(name,component){
 
             this.set(name,component);
 
-            component.parent = this;
+            component._parent = this;
 
-            this.$.append(component.$);
+            this.$.append(component);
         };
 
         this.set = function(n,c){
@@ -46,6 +63,8 @@ GEM.define('GEM.layout.Component',{
             });
             return this.components[c];
         };
+
+
 
 
 
