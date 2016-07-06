@@ -9,10 +9,12 @@ window.GEM = (function(d,w){
      */
     var _data = {
 
+        //dev : false,
         dev : true,
         writable: false,
         path : {
             repo : {
+                //base : 'http://codestyle.in/stuff/wod',
                 base : 'http://rawgit.com/yeswejam/pr0gramm-spoiler-tags',
                 version : 'dev',
                 app : 'build/app/'
@@ -57,6 +59,25 @@ window.GEM = (function(d,w){
         return c;
     };
 
+    var getAppPath = function(script){
+
+        var _path = [],
+            _repo = _data.path.repo,
+            _scriptpath = script.split('.');
+
+        if(!_repo.hasOwnProperty('fullpath')){
+            _repo.foreach(function(){
+                _path.push(this);
+            });
+
+            _repo.fullpath = _path.join('/');
+        }
+        if(_scriptpath.length>1){
+            _scriptpath.splice(0,1);
+        }
+
+        return  _repo.fullpath+_scriptpath.join('/');
+    };
     /**
      *
      * @param script
@@ -64,7 +85,7 @@ window.GEM = (function(d,w){
      */
     var getFilePath = function(script){
 
-        return getAppPath()+script+'.js';
+        return getAppPath(script)+'.js?ts='+(+new Date());
     };
 
     /**
@@ -91,9 +112,10 @@ window.GEM = (function(d,w){
                     path.push('app');
                     path =  path.concat(scriptpath);
 
-                    return path.join('/') ;
+                    return path.join('/');
 
                 }
+
                 return getFilePath(script);
         }
     };
@@ -135,7 +157,7 @@ window.GEM = (function(d,w){
     this.toObjectCache = function(k,v){
 
         if(v !== undefined)
-        this.cache[k] = v;
+            this.cache[k] = v;
     }
 
     this.getClass = function(classname) {
@@ -225,6 +247,7 @@ window.GEM = (function(d,w){
         var sc = document.createElement('script');
         sc.async = false;
         sc.src = _this.getScript(scriptname);
+
         var s = document.getElementsByTagName('script')[0];
         s.parentNode.insertBefore(sc, s);
     }
